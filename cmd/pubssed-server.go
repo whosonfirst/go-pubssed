@@ -5,7 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/facebookgo/grace/gracehttp"
-	// "github.com/whosonfirst/go-httpony/stats"
+	"github.com/whosonfirst/go-httpony/stats"
 	"github.com/whosonfirst/go-pubssed/broker"
 	"log"
 	"net/http"
@@ -41,15 +41,13 @@ func main() {
 
 	mux.HandleFunc("/", sse_handler)
 
-	/*
-		stats_handler, err := stats.HandlerFunc(*sse_host)
+	stats_handler, err := stats.HandlerFunc(*sse_host)
 
-		if err != nil {
-			log.Fatal(err)
-		}
+	if err != nil {
+		log.Fatal(err)
+	}
 
-		mux.HandleFunc("/debug/vars", stats_handler)
-	*/
+	mux.HandleFunc("/debug/vars", stats_handler)
 
 	sse_endpoint := fmt.Sprintf("%s:%d", *sse_host, *sse_port)
 	err = gracehttp.Serve(&http.Server{Addr: sse_endpoint, Handler: mux})
