@@ -6,15 +6,21 @@ import (
 	"github.com/whosonfirst/go-pubssed/listener"
 	"log"
 	"os"
+	"path/filepath"
 	"time"
 )
 
 func main() {
 
-	var endpoint = flag.String("endpoint", "", "...")
-	var callback = flag.String("callback", "debug", "...")
+	var endpoint = flag.String("endpoint", "", "The pubssed endpoint you are connecting to")
+	var callback = flag.String("callback", "debug", "The callback to invoke when a SSE event is received")
+	var append_root = flag.String("append-root", ".", "The destination to write log files if the 'append' callback is invoked")
 
 	flag.Parse()
+
+	if *endpoint == "" {
+		log.Fatal("Missing pubssed endpoint")
+	}
 
 	var f listener.ListenerFunc
 
@@ -28,18 +34,61 @@ func main() {
 
 	} else if *callback == "append" {
 
+		root := *append_root
+
+		if root == "." {
+
+			cwd, err := os.Getwd()
+
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			root = cwd
+		} else {
+
+			_, err := os.Stat(root)
+
+			if os.IsNotExist(err) {
+				log.Fatal(root)
+			}
+		}
+
 		f = func(msg string) error {
 
 			now := time.Now()
-			fname := fmt.Sprintf("%04d%02d%02d%02d.txt", now.Year(), now.Month(), now.Day(), now.Hour())
 
-			fh, err := os.OpenFile(fname, os.O_CREATE|os.O_APPEND, 0644)
+			// ts := now.UnixNano() / int64(time.Millisecond)
+
+			year := fmt.Sprintf("%04d", now.Year())
+			month := fmt.Sprintf("%02d", now.Month())
+			day := fmt.Sprintf("%02d", now.Day())
+
+			dirname := filepath.Join(root, year, month, day)
+			fname := fmt.Sprintf("%s%s%s%02d.txt", year, month, day, now.Hour())
+
+			path := filepath.Join(dirname, fname)
+
+			_, err := os.Stat(dirname)
+
+			if os.IsNotExist(err) {
+
+				err = os.MkdirAll(dirname, 0755)
+
+				if err != nil {
+					return err
+				}
+			}
+
+			fh, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 
 			if err != nil {
 				return err
 			}
 
 			defer fh.Close()
+
+			msg = fmt.Sprintf("%s\n", msg)
 
 			_, err = fh.Write([]byte(msg))
 
