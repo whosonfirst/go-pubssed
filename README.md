@@ -27,7 +27,7 @@ import (
 br, _ := broker.NewBroker()
 br.Start("localhost", 6379, "pubssed")
 
-http_handler, err := br.HandlerFunc()
+http_handler, _ := br.HandlerFunc()
 
 mux := http.NewServeMux()
 mux.HandleFunc("/", http_handler)
