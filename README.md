@@ -4,6 +4,16 @@
 
 Listen to a Redis PubSub channel and then rebroadcast it over Server-Sent Events (SSE).
 
+## Install
+
+You will need to have both `Go` and the `make` programs installed on your computer. Assuming you do just type:
+
+```
+make bin
+```
+
+All of this package's dependencies are bundled with the code in the `vendor` directory.
+
 ## Packages
 
 ### broker
@@ -47,7 +57,7 @@ _Note that all error handling has been removed for the sake of brevity._
 
 ## Tools
 
-### pubssed-broadcast.go
+### pubssed-broadcast
 
 ```
 ./bin/pubssed-broadcast -h
@@ -61,8 +71,10 @@ Usage of ./bin/pubssed-broadcast:
   -redis-port int
     	Redis port (default 6379)
 ```
-	
-### pubssed-client.go
+
+A simple command-line application for spewing as many messages (timestamps) as possible to a PubSub channel for testing how a `pubssed` server will handle the load.
+
+### pubssed-client
 
 ```
 ./bin/pubssed-client -h
@@ -75,7 +87,11 @@ Usage of ./bin/pubssed-client:
     	The pubssed endpoint you are connecting to
 ```
 
+A simple command-line application for subscribing to an SSE server and invoke a callback when an event is received.
+
 #### callbacks
+
+`pubssed-client` is included as a reference implementation for the simplest-dumbest kind of "listener" application so it only has a pair of default callbacks by default.
 
 ##### append
 
@@ -85,7 +101,7 @@ Appends each SSE event a file named `YYYY/MM/DD/YYYYMMDDHH.txt` (where datetime 
 
 Logs each SSE event to STDOUT.
 
-### pubssed-server.go
+### pubssed-server
 
 ```
 ./bin/pubssed-server -h
@@ -103,6 +119,8 @@ Usage of ./bin/pubssed-server:
   -sse-port int
     	SSE port (default 8080)
 ```
+
+An actuall living breathing server that will listen to (and relay) a PubSub channel and that an SSE client can connect to and receive messages.
 
 ## See also
 
