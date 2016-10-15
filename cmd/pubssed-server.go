@@ -39,7 +39,15 @@ func main() {
 		log.Fatal(err)
 	}
 
-	mux.HandleFunc("/", sse_handler)
+	/*
+
+		I would like this to be plain old "/" but I don't seem to be able to figure
+		out how to make the ServeMux (?) to interpret that as "/$" because ... ?
+		(20161015/thisisaaronland)
+
+	*/
+
+	mux.HandleFunc("/sse", sse_handler)
 
 	stats_handler, err := stats.HandlerFunc(*sse_host)
 
@@ -47,7 +55,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	mux.HandleFunc("/debug/vars", stats_handler)
+	mux.HandleFunc("/stats", stats_handler)
 
 	sse_endpoint := fmt.Sprintf("%s:%d", *sse_host, *sse_port)
 	err = gracehttp.Serve(&http.Server{Addr: sse_endpoint, Handler: mux})
