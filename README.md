@@ -24,10 +24,10 @@ import (
 	"net/http"
 )
 
-br, _ := broker.NewBroker()
-br.Start("localhost", 6379, "pubssed")
+brkr, _ := broker.NewBroker()
+brkr.Start("localhost", 6379, "pubssed")
 
-http_handler, _ := br.HandlerFunc()
+http_handler, _ := brkr.HandlerFunc()
 
 mux := http.NewServeMux()
 mux.HandleFunc("/", http_handler)
