@@ -16,6 +16,7 @@ func main() {
 
 	var sse_host = flag.String("sse-host", "localhost", "SSE host")
 	var sse_port = flag.Int("sse-port", 8080, "SSE port")
+	var sse_endpoint = flag.String("sse-endpoint", "/sse", "SSE endpoint")
 
 	var redis_host = flag.String("redis-host", "localhost", "Redis host")
 	var redis_port = flag.Int("redis-port", 6379, "Redis port")
@@ -47,7 +48,7 @@ func main() {
 
 	*/
 
-	mux.HandleFunc("/sse", sse_handler)
+	mux.HandleFunc(*sse_endpoint, sse_handler)
 
 	stats_handler, err := stats.HandlerFunc(*sse_host)
 
@@ -57,8 +58,8 @@ func main() {
 
 	mux.HandleFunc("/stats", stats_handler)
 
-	sse_endpoint := fmt.Sprintf("%s:%d", *sse_host, *sse_port)
-	err = gracehttp.Serve(&http.Server{Addr: sse_endpoint, Handler: mux})
+	sse_addr := fmt.Sprintf("%s:%d", *sse_host, *sse_port)
+	err = gracehttp.Serve(&http.Server{Addr: sse_addr, Handler: mux})
 
 	if err != nil {
 		log.Fatal(err)
