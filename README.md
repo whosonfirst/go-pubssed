@@ -125,5 +125,5 @@ An actuall living breathing server that will listen to (and relay) a PubSub chan
 ## See also
 
 * https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events
-* https://github.com/whosonfirst/go-whosonfirst-webhookd
+* https://github.com/whosonfirst/go-webhookd
 * https://github.com/whosonfirst/go-pubsocketd
