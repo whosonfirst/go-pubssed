@@ -12,9 +12,10 @@ import (
 
 func main() {
 
-	var endpoint = flag.String("endpoint", "", "The pubssed endpoint you are connecting to")
-	var callback = flag.String("callback", "debug", "The callback to invoke when a SSE event is received")
-	var append_root = flag.String("append-root", ".", "The destination to write log files if the 'append' callback is invoked")
+	var endpoint = flag.String("endpoint", "", "The pubssed endpoint you are connecting to.")
+	var callback = flag.String("callback", "debug", "The callback to invoke when a SSE event is received.")
+	var append_root = flag.String("append-root", ".", "The destination to write log files if the 'append' callback is invoked.")
+	var retry = flag.Bool("retry-on-eof", false, "Try to reconnect to the SSE endpoint if an EOF error is triggered. This is sometimes necessary if an SSE endpoint is configured with a too-short HTTP timeout (for example if running behind an AWS load balancer).")
 
 	flag.Parse()
 
@@ -109,10 +110,18 @@ func main() {
 		log.Fatal(err)
 	}
 
-	err = l.Start()
+	for {
+		err = l.Start()
 
-	if err != nil {
-		log.Fatal(err)
+		if err != nil {
+
+			if *retry && err.Error() == "EOF" {
+				log.Println("EOF error triggered, reconnecting")
+				continue
+			}
+
+			log.Fatal(err)
+		}
 	}
 
 	os.Exit(0)

@@ -80,11 +80,13 @@ A simple command-line application for spewing as many messages (timestamps) as p
 ./bin/pubssed-client -h
 Usage of ./bin/pubssed-client:
   -append-root string
-    	The destination to write log files if the 'append' callback is invoked (default ".")
+    	The destination to write log files if the 'append' callback is invoked. (default ".")
   -callback string
-    	The callback to invoke when a SSE event is received (default "debug")
+    	The callback to invoke when a SSE event is received. (default "debug")
   -endpoint string
-    	The pubssed endpoint you are connecting to
+    	The pubssed endpoint you are connecting to.
+  -retry-on-eof
+    	Try to reconnect to the SSE endpoint if an EOF error is triggered. This is sometimes necessary if an SSE endpoint is configured with a too-short HTTP timeout (for example if running behind an AWS load balancer).
 ```
 
 A simple command-line application for subscribing to an SSE server and invoke a callback when an event is received.
