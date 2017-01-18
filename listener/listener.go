@@ -53,6 +53,11 @@ func (l *Listener) Start() error {
 		bs, err := br.ReadBytes('\n')
 
 		if err != nil {
+
+			if err.Error() == "EOF" {
+			   	return l.Start()
+			}
+			
 			return err
 		}
 
