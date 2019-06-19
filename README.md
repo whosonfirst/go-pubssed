@@ -6,10 +6,10 @@ Listen to a Redis PubSub channel and then rebroadcast it over Server-Sent Events
 
 ## Install
 
-You will need to have both `Go` and the `make` programs installed on your computer. Assuming you do just type:
+You will need to have both `Go` (specifically version [1.12](https://golang.org/dl/) or higher) and the `make` programs installed on your computer. Assuming you do just type:
 
 ```
-make bin
+make tools
 ```
 
 All of this package's dependencies are bundled with the code in the `vendor` directory.
@@ -127,5 +127,6 @@ An actuall living breathing server that will listen to (and relay) a PubSub chan
 ## See also
 
 * https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events
+* https://github.com/go-redis/redis
 * https://github.com/whosonfirst/go-webhookd
 * https://github.com/whosonfirst/go-pubsocketd

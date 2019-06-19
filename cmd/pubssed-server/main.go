@@ -40,11 +40,12 @@ func main() {
 	mux.HandleFunc(*sse_endpoint, sse_handler)
 
 	sse_addr := fmt.Sprintf("%s:%d", *sse_host, *sse_port)
+	log.Printf("Listening on %s\n", sse_addr)
 
-	err = http.ListenAndServe(sse_addr, mux)
+	err := http.ListenAndServe(sse_addr, mux)
 
 	if err != nil {
-		log.Fatal(err)
+		err_ch <- err
 	}
 
 	os.Exit(0)

@@ -46,7 +46,7 @@ func (b *Broker) Start(redis_host string, redis_port int, redis_channel string) 
 
 	pubsub_client := redis_client.PSubscribe(redis_channel)
 	defer pubsub_client.Close()
-	
+
 	// set up the SSE monitor
 
 	go func() {
@@ -90,7 +90,7 @@ func (b *Broker) Start(redis_host string, redis_port int, redis_channel string) 
 
 		pubsub_client := redis_client.PSubscribe(redis_channel)
 		defer pubsub_client.Close()
-		
+
 		for {
 
 			i, _ := pubsub_client.Receive()
