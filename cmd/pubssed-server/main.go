@@ -42,10 +42,10 @@ func main() {
 	sse_addr := fmt.Sprintf("%s:%d", *sse_host, *sse_port)
 	log.Printf("Listening on %s\n", sse_addr)
 
-	err := http.ListenAndServe(sse_addr, mux)
+	err = http.ListenAndServe(sse_addr, mux)
 
 	if err != nil {
-		err_ch <- err
+		log.Fatal(err)
 	}
 
 	os.Exit(0)
