@@ -2,7 +2,7 @@ package broker
 
 import (
 	"fmt"
-	"gopkg.in/redis.v1"
+	"github.com/go-redis/redis"
 	_ "log"
 	"net/http"
 )
@@ -38,21 +38,15 @@ func (b *Broker) Start(redis_host string, redis_port int, redis_channel string) 
 
 	*/
 
-	redis_client := redis.NewTCPClient(&redis.Options{
+	redis_client := redis.NewClient(&redis.Options{
 		Addr: redis_endpoint,
 	})
 
 	defer redis_client.Close()
 
-	pubsub_client := redis_client.PubSub()
+	pubsub_client := redis_client.PSubscribe(redis_channel)
 	defer pubsub_client.Close()
-
-	err := pubsub_client.Subscribe(redis_channel)
-
-	if err != nil {
-		return err
-	}
-
+	
 	// set up the SSE monitor
 
 	go func() {
@@ -88,17 +82,15 @@ func (b *Broker) Start(redis_host string, redis_port int, redis_channel string) 
 
 	go func() {
 
-		redis_client := redis.NewTCPClient(&redis.Options{
+		redis_client := redis.NewClient(&redis.Options{
 			Addr: redis_endpoint,
 		})
 
 		defer redis_client.Close()
 
-		pubsub_client := redis_client.PubSub()
+		pubsub_client := redis_client.PSubscribe(redis_channel)
 		defer pubsub_client.Close()
-
-		pubsub_client.Subscribe(redis_channel)
-
+		
 		for {
 
 			i, _ := pubsub_client.Receive()
