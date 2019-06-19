@@ -124,6 +124,39 @@ Usage of ./bin/pubssed-server:
 
 An actuall living breathing server that will listen to (and relay) a PubSub channel and that an SSE client can connect to and receive messages.
 
+## Docker
+
+Yes. See the included [Dockerfile](Dockerfile) for details.
+
+```
+$> docker build -t go-pubssed .
+...time passes
+
+$> docker run go-pubssed /usr/bin/pubssed-server -h
+Usage of /usr/bin/pubssed-server:
+  -redis-channel string
+    	Redis channel (default "pubssed")
+  -redis-host string
+    	Redis host (default "localhost")
+  -redis-port int
+    	Redis port (default 6379)
+  -sse-endpoint string
+    	SSE endpoint (default "/sse")
+  -sse-host string
+    	SSE host (default "localhost")
+  -sse-port int
+    	SSE port (default 8080)
+```
+
+For example:
+
+```
+$> docker run -p 6161:8080 go-pubssed /usr/bin/pubssed-server
+2019/06/19 16:45:13 Listening on localhost:8080
+```
+
+By default `go-pubssed` expects to find a Redis channel to listen to on `localhost:6379`. The Dockerfile as it is written does not install Redis so it is up to you to specify an alternate Redis endpoint, somewhere outside of the `go-pubssed` Docker container.
+
 ## See also
 
 * https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events
