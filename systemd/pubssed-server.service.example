@@ -1,0 +1,19 @@
+[Unit]
+Description=PubSub to Server-Sent Events relay server
+ConditionPathExists=/usr/local/bin/pubssed-server
+After=network.target
+ 
+[Service]
+Type=simple
+User=pubssed
+Group=pubssed
+LimitNOFILE=1024
+
+Restart=on-failure
+RestartSec=10
+
+WorkingDirectory=/usr/local/bin
+ExecStart=/usr/local/bin/pubssed-server
+ 
+[Install]
+WantedBy=multi-user.target
