@@ -161,7 +161,7 @@ func (b *Broker) HandlerFunc() (http.HandlerFunc, error) {
 				break
 			}
 
-			fmt.Fprintf(w, "data: Message: %s\n\n", msg)
+			fmt.Fprintf(w, "data: %s\n\n", msg)
 			fl.Flush()
 		}
 
