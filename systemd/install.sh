@@ -51,8 +51,16 @@ do
 
     if [ -f ${SERVICE} ]
     then
-	cp ${SYSTEMD}/${SERVICE_FNAME}.example ${SERVICE}
-	sudo chmod 644 ${SERVICE}
+
+	if [ -f ${SYSTEMD}/${SERVICE_FNAME} ]
+	then
+	    echo "Found a local ${SERVICE_FNAME} file so installing that"
+	    cp ${SYSTEMD}/${SERVICE_FNAME} ${SERVICE}
+	else 
+	    cp ${SYSTEMD}/${SERVICE_FNAME}.example ${SERVICE}
+	fi
+	
+	    sudo chmod 644 ${SERVICE}
 
 	echo ""
 	echo "system stuff installed - you will still need to run the following, manually:"
