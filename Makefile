@@ -5,3 +5,6 @@ tools:
 
 docker:
 	docker build -t go-pubssed .
+
+install:
+	sudo systemd/install.sh
