@@ -72,7 +72,7 @@ func (l *Listener) Start() error {
 			continue
 		}
 
-		msg := string(bytes.TrimSpace(spl[2]))
+		msg := string(bytes.TrimSpace(spl[1]))
 
 		err = l.callback(msg)
 
