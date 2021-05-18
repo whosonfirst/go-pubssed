@@ -1,9 +1,9 @@
 package main
 
 import (
-	"flag"
+	"flag"	
 	"fmt"
-	"github.com/go-redis/redis"
+	"github.com/go-redis/redis/v8"
 	_ "log"
 	"os"
 	"time"

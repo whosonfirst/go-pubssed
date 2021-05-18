@@ -2,7 +2,7 @@ package broker
 
 import (
 	"fmt"
-	"github.com/go-redis/redis"
+	"github.com/go-redis/redis/v8"
 	_ "log"
 	"net/http"
 )
