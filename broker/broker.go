@@ -1,6 +1,7 @@
 package broker
 
 import (
+	"context"
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	_ "log"
@@ -28,6 +29,8 @@ func NewBroker() (*Broker, error) {
 
 func (b *Broker) Start(redis_host string, redis_port int, redis_channel string) error {
 
+	ctx := context.Background()
+
 	redis_endpoint := fmt.Sprintf("%s:%d", redis_host, redis_port)
 
 	/*
@@ -44,7 +47,7 @@ func (b *Broker) Start(redis_host string, redis_port int, redis_channel string) 
 
 	defer redis_client.Close()
 
-	pubsub_client := redis_client.PSubscribe(redis_channel)
+	pubsub_client := redis_client.PSubscribe(ctx, redis_channel)
 	defer pubsub_client.Close()
 
 	// set up the SSE monitor
@@ -88,12 +91,12 @@ func (b *Broker) Start(redis_host string, redis_port int, redis_channel string) 
 
 		defer redis_client.Close()
 
-		pubsub_client := redis_client.PSubscribe(redis_channel)
+		pubsub_client := redis_client.PSubscribe(ctx, redis_channel)
 		defer pubsub_client.Close()
 
 		for {
 
-			i, _ := pubsub_client.Receive()
+			i, _ := pubsub_client.Receive(ctx)
 
 			// log.Println("received message", i)
 

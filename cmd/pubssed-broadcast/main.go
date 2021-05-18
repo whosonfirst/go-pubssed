@@ -1,7 +1,8 @@
 package main
 
 import (
-	"flag"	
+	"context"
+	"flag"
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	_ "log"
@@ -18,6 +19,8 @@ func main() {
 	var redis_channel = flag.String("redis-channel", "pubssed", "Redis channel")
 
 	flag.Parse()
+
+	ctx := context.Background()
 
 	redis_endpoint := fmt.Sprintf("%s:%d", *redis_host, *redis_port)
 
@@ -38,7 +41,7 @@ func main() {
 		<-ch
 
 		now := fmt.Sprintf("%v", time.Now())
-		redis_client.Publish(*redis_channel, now)
+		redis_client.Publish(ctx, *redis_channel, now)
 
 		ch <- true
 	}
