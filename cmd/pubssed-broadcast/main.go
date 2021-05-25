@@ -41,6 +41,7 @@ func main() {
 		<-ch
 
 		now := fmt.Sprintf("%v", time.Now())
+		// log.Println(*redis_channel, now)
 		redis_client.Publish(ctx, *redis_channel, now)
 
 		ch <- true

@@ -1,9 +1,11 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"github.com/whosonfirst/go-pubssed/broker"
+	"github.com/whosonfirst/go-pubssed/subscription"
 	"log"
 	"net/http"
 	"os"
@@ -15,11 +17,17 @@ func main() {
 	var sse_port = flag.Int("sse-port", 8080, "SSE port")
 	var sse_endpoint = flag.String("sse-endpoint", "/sse", "SSE endpoint")
 
-	var redis_host = flag.String("redis-host", "localhost", "Redis host")
-	var redis_port = flag.Int("redis-port", 6379, "Redis port")
-	var redis_channel = flag.String("redis-channel", "pubssed", "Redis channel")
+	var subscription_uri = flag.String("subscription-uri", "redis://?host=localhost&port=6379&channel=pubssed", "...")
 
 	flag.Parse()
+
+	ctx := context.Background()
+
+	sub, err := subscription.NewSubscription(ctx, *subscription_uri)
+
+	if err != nil {
+		log.Fatalf("Failed to create subscription for '%s', %v", *subscription_uri, err)
+	}
 
 	br, err := broker.NewBroker()
 
@@ -27,7 +35,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	br.Start(*redis_host, *redis_port, *redis_channel)
+	br.Start(ctx, sub)
 
 	mux := http.NewServeMux()
 

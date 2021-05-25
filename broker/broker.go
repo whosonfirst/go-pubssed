@@ -3,7 +3,7 @@ package broker
 import (
 	"context"
 	"fmt"
-	"github.com/go-redis/redis/v8"
+	"github.com/whosonfirst/go-pubssed/subscription"
 	_ "log"
 	"net/http"
 )
@@ -27,28 +27,7 @@ func NewBroker() (*Broker, error) {
 	return &b, nil
 }
 
-func (b *Broker) Start(redis_host string, redis_port int, redis_channel string) error {
-
-	ctx := context.Background()
-
-	redis_endpoint := fmt.Sprintf("%s:%d", redis_host, redis_port)
-
-	/*
-
-		we're going to set up the redis/pubsub clients again below inside the scope
-		of a Go routine; we're doing it here to perform basic sanity checking on the
-		subscription (20161014/thisisaaronland)
-
-	*/
-
-	redis_client := redis.NewClient(&redis.Options{
-		Addr: redis_endpoint,
-	})
-
-	defer redis_client.Close()
-
-	pubsub_client := redis_client.PSubscribe(ctx, redis_channel)
-	defer pubsub_client.Close()
+func (b *Broker) Start(ctx context.Context, sub subscription.Subscription) error {
 
 	// set up the SSE monitor
 
@@ -57,6 +36,9 @@ func (b *Broker) Start(redis_host string, redis_port int, redis_channel string) 
 		for {
 
 			select {
+
+			case <-ctx.Done():
+				return
 
 			case s := <-b.new_clients:
 
@@ -85,27 +67,9 @@ func (b *Broker) Start(redis_host string, redis_port int, redis_channel string) 
 
 	go func() {
 
-		redis_client := redis.NewClient(&redis.Options{
-			Addr: redis_endpoint,
-		})
+		// something something error handling...
 
-		defer redis_client.Close()
-
-		pubsub_client := redis_client.PSubscribe(ctx, redis_channel)
-		defer pubsub_client.Close()
-
-		for {
-
-			i, _ := pubsub_client.Receive(ctx)
-
-			// log.Println("received message", i)
-
-			if msg, _ := i.(*redis.Message); msg != nil {
-
-				// log.Println("relay message", msg.Payload)
-				b.messages <- msg.Payload
-			}
-		}
+		sub.Start(ctx, b.messages)
 	}()
 
 	return nil

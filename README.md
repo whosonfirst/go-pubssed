@@ -10,12 +10,18 @@ Listen to a Redis PubSub channel and then rebroadcast it over Server-Sent Events
 
 ```
 import (
+        "context"
 	"github.com/whosonfirst/go-pubssed/broker"
+	"github.com/whosonfirst/go-pubssed/subscription"	
 	"net/http"
 )
 
+ctx := context.Background()
+
+sub, _ := subscription.NewSubscription(ctx, "redis://?host=localhost&port=6379&channel=pubssed")
+
 brkr, _ := broker.NewBroker()
-brkr.Start("localhost", 6379, "pubssed")
+brkr.Start(ctx, sub)
 
 http_handler, _ := brkr.HandlerFunc()
 

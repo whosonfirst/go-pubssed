@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/go-redis/redis/v8"
+	"log"
 	"net/url"
 )
 
@@ -11,6 +12,11 @@ type RedisSubscription struct {
 	Subscription
 	redis_client  *redis.Client
 	redis_channel string
+}
+
+func init() {
+	ctx := context.Background()
+	RegisterSubscription(ctx, "redis", NewRedisSubscription)
 }
 
 func NewRedisSubscription(ctx context.Context, uri string) (Subscription, error) {
@@ -28,6 +34,8 @@ func NewRedisSubscription(ctx context.Context, uri string) (Subscription, error)
 	channel := q.Get("channel")
 
 	addr := fmt.Sprintf("%s:%s", host, port)
+
+	log.Println("ADDR", addr)
 
 	redis_client := redis.NewClient(&redis.Options{
 		Addr: addr,
@@ -52,7 +60,7 @@ func (s *RedisSubscription) Start(ctx context.Context, messages_ch chan string) 
 		// log.Println("received message", i)
 
 		if msg, _ := i.(*redis.Message); msg != nil {
-			// log.Println("relay message", msg.Payload)
+			log.Println("relay message", msg.Payload)
 			messages_ch <- msg.Payload
 		}
 	}
