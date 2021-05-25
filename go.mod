@@ -1,6 +1,6 @@
 module github.com/whosonfirst/go-pubssed
 
-go 1.12
+go 1.16
 
 require (
 	github.com/aaronland/go-roster v0.0.2
