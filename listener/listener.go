@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	_ "log"
+	"fmt"
 	"net/http"
 )
 
@@ -33,7 +34,7 @@ func (l *Listener) Start() error {
 	req, err := http.NewRequest("GET", l.endpoint, nil)
 
 	if err != nil {
-		return err
+		return fmt.Errorf("Failed to create new request, %w", err)
 	}
 
 	req.Header.Set("Accept", "text/event-stream")
@@ -41,7 +42,7 @@ func (l *Listener) Start() error {
 	res, err := l.client.Do(req)
 
 	if err != nil {
-		return err
+		return fmt.Errorf("Failed to request %s, %w", l.endpoint, err)
 	}
 
 	br := bufio.NewReader(res.Body)
@@ -53,7 +54,7 @@ func (l *Listener) Start() error {
 		bs, err := br.ReadBytes('\n')
 
 		if err != nil {
-			return err
+			return fmt.Errorf("Failed to read bytes, %w", err)
 		}
 
 		if len(bs) < 2 {
@@ -77,7 +78,7 @@ func (l *Listener) Start() error {
 		err = l.callback(msg)
 
 		if err != nil {
-			return err
+			return fmt.Errorf("Listener callback failed, %w", err)
 		}
 	}
 
