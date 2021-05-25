@@ -3,8 +3,8 @@ package listener
 import (
 	"bufio"
 	"bytes"
-	_ "log"
 	"fmt"
+	_ "log"
 	"net/http"
 )
 
@@ -37,7 +37,10 @@ func (l *Listener) Start() error {
 		return fmt.Errorf("Failed to create new request, %w", err)
 	}
 
+	req.Header.Set("Cache-Control", "no-cache")
 	req.Header.Set("Accept", "text/event-stream")
+	req.Header.Set("Connection", "keep-alive")
+	//req.Header.Set("Accept", "text/event-stream")
 
 	res, err := l.client.Do(req)
 

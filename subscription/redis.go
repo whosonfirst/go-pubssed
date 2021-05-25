@@ -35,8 +35,6 @@ func NewRedisSubscription(ctx context.Context, uri string) (Subscription, error)
 
 	addr := fmt.Sprintf("%s:%s", host, port)
 
-	log.Println("ADDR", addr)
-
 	redis_client := redis.NewClient(&redis.Options{
 		Addr: addr,
 	})

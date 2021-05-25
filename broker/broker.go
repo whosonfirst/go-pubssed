@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/whosonfirst/go-pubssed/subscription"
-	_ "log"
+	"log"
 	"net/http"
 )
 
@@ -95,7 +95,7 @@ func (b *Broker) HandlerFunc() (http.HandlerFunc, error) {
 		go func() {
 			<-notify
 			b.bunk_clients <- messageChan
-			// log.Println("HTTP connection just closed.")
+			log.Println("HTTP connection just closed.")
 		}()
 
 		// Set the headers related to event streaming.
@@ -125,6 +125,7 @@ func (b *Broker) HandlerFunc() (http.HandlerFunc, error) {
 			msg, open := <-messageChan
 
 			if !open {
+				log.Println("NO MESSAGE")
 				break
 			}
 
@@ -132,7 +133,7 @@ func (b *Broker) HandlerFunc() (http.HandlerFunc, error) {
 			fl.Flush()
 		}
 
-		// log.Println("Finished HTTP request at ", r.URL.Path)
+		log.Println("Finished HTTP request at ", r.URL.Path)
 	}
 
 	return http.HandlerFunc(f), nil
