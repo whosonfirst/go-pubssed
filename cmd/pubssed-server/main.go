@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"embed"
 	"flag"
 	"fmt"
 	"github.com/whosonfirst/go-pubssed/broker"
@@ -9,7 +10,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"embed"
 )
 
 //go:embed index.html index.js
@@ -24,7 +24,7 @@ func main() {
 	var subscription_uri = flag.String("subscription-uri", "redis://?host=localhost&port=6379&channel=pubssed", "...")
 
 	enable_demo := flag.Bool("enable-demo", false, "...")
-	
+
 	flag.Parse()
 
 	ctx := context.Background()
@@ -58,7 +58,7 @@ func main() {
 		fs_handler := http.FileServer(http_fs)
 		mux.Handle("/", fs_handler)
 	}
-	
+
 	sse_addr := fmt.Sprintf("%s:%d", *sse_host, *sse_port)
 	log.Printf("Listening on %s\n", sse_addr)
 
