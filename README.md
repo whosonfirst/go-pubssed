@@ -4,6 +4,10 @@
 
 Listen to a Redis PubSub channel and then rebroadcast it over Server-Sent Events (SSE).
 
+## Important
+
+Documentation is incomplete still.
+
 ## Packages
 
 ### broker
