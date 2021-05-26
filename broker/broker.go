@@ -104,6 +104,8 @@ func (b *Broker) HandlerFunc() (http.HandlerFunc, error) {
 		w.Header().Set("Cache-Control", "no-cache")
 		w.Header().Set("Connection", "keep-alive")
 
+		// For CORS stuff please use https://github.com/rs/cors
+		
 		// Don't close the connection, instead loop 10 times,
 		// sending messages and flushing the response each time
 		// there is a new message to send along.
