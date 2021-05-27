@@ -3,7 +3,7 @@ package broker
 import (
 	"context"
 	"fmt"
-	"github.com/whosonfirst/go-pubssed/subscription"
+	"github.com/sfomuseum/go-pubsub/subscriber"
 	"log"
 	"net/http"
 )
@@ -27,10 +27,10 @@ func NewBroker() (*Broker, error) {
 	return &b, nil
 }
 
-func (b *Broker) Start(ctx context.Context, sub subscription.Subscription) error {
+func (b *Broker) Start(ctx context.Context, sub subscriber.Subscriber) error {
 
-	// set up the SSE monitor
-
+	// set up the SSE monitor	
+	
 	go func() {
 
 		for {
@@ -69,7 +69,7 @@ func (b *Broker) Start(ctx context.Context, sub subscription.Subscription) error
 
 		// something something error handling...
 
-		sub.Start(ctx, b.messages)
+		sub.Listen(ctx, b.messages)
 	}()
 
 	return nil

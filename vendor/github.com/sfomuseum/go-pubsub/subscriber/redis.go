@@ -1,4 +1,4 @@
-package subscription
+package subscriber
 
 import (
 	"context"
@@ -8,18 +8,18 @@ import (
 	"net/url"
 )
 
-type RedisSubscription struct {
-	Subscription
+type RedisSubscriber struct {
+	Subscriber
 	redis_client  *redis.Client
 	redis_channel string
 }
 
 func init() {
 	ctx := context.Background()
-	RegisterSubscription(ctx, "redis", NewRedisSubscription)
+	RegisterSubscriber(ctx, "redis", NewRedisSubscriber)
 }
 
-func NewRedisSubscription(ctx context.Context, uri string) (Subscription, error) {
+func NewRedisSubscriber(ctx context.Context, uri string) (Subscriber, error) {
 
 	u, err := url.Parse(uri)
 
@@ -39,7 +39,7 @@ func NewRedisSubscription(ctx context.Context, uri string) (Subscription, error)
 		Addr: addr,
 	})
 
-	s := &RedisSubscription{
+	s := &RedisSubscriber{
 		redis_client:  redis_client,
 		redis_channel: channel,
 	}
@@ -47,7 +47,7 @@ func NewRedisSubscription(ctx context.Context, uri string) (Subscription, error)
 	return s, nil
 }
 
-func (s *RedisSubscription) Start(ctx context.Context, messages_ch chan string) error {
+func (s *RedisSubscriber) Listen(ctx context.Context, messages_ch chan string) error {
 
 	pubsub_client := s.redis_client.PSubscribe(ctx, s.redis_channel)
 	defer pubsub_client.Close()
@@ -66,6 +66,6 @@ func (s *RedisSubscription) Start(ctx context.Context, messages_ch chan string) 
 	return nil
 }
 
-func (s *RedisSubscription) Close() error {
+func (s *RedisSubscriber) Close() error {
 	return s.redis_client.Close()
 }

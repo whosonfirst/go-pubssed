@@ -1,4 +1,4 @@
-package subscription
+package subscriber
 
 import (
 	"context"
@@ -6,17 +6,17 @@ import (
 	"time"
 )
 
-type TickerSubscription struct {
-	Subscription
+type TickerSubscriber struct {
+	Subscriber
 	ticker *time.Ticker
 }
 
 func init() {
 	ctx := context.Background()
-	RegisterSubscription(ctx, "ticker", NewTickerSubscription)
+	RegisterSubscriber(ctx, "ticker", NewTickerSubscriber)
 }
 
-func NewTickerSubscription(ctx context.Context, uri string) (Subscription, error) {
+func NewTickerSubscriber(ctx context.Context, uri string) (Subscriber, error) {
 
 	_, err := url.Parse(uri)
 
@@ -26,14 +26,14 @@ func NewTickerSubscription(ctx context.Context, uri string) (Subscription, error
 
 	t := time.NewTicker(1 * time.Second)
 
-	sub := &TickerSubscription{
+	sub := &TickerSubscriber{
 		ticker: t,
 	}
 
 	return sub, nil
 }
 
-func (sub *TickerSubscription) Start(ctx context.Context, messages_ch chan string) error {
+func (sub *TickerSubscriber) Listen(ctx context.Context, messages_ch chan string) error {
 
 	for {
 		select {
@@ -47,7 +47,7 @@ func (sub *TickerSubscription) Start(ctx context.Context, messages_ch chan strin
 	return nil
 }
 
-func (sub *TickerSubscription) Close() error {
+func (sub *TickerSubscriber) Close() error {
 	sub.ticker.Stop()
 	return nil
 }

@@ -1,4 +1,4 @@
-package subscription
+package subscriber
 
 import (
 	"context"
@@ -9,18 +9,18 @@ import (
 	"strings"
 )
 
-type Subscription interface {
-	Start(context.Context, chan string) error
+type Subscriber interface {
+	Listen(context.Context, chan string) error
 	Close() error
 }
 
-type SubscriptionInitializeFunc func(ctx context.Context, uri string) (Subscription, error)
+type SubscriberInitializeFunc func(ctx context.Context, uri string) (Subscriber, error)
 
-var subscriptions roster.Roster
+var subscribers roster.Roster
 
 func ensureSpatialRoster() error {
 
-	if subscriptions == nil {
+	if subscribers == nil {
 
 		r, err := roster.NewDefaultRoster()
 
@@ -28,13 +28,13 @@ func ensureSpatialRoster() error {
 			return err
 		}
 
-		subscriptions = r
+		subscribers = r
 	}
 
 	return nil
 }
 
-func RegisterSubscription(ctx context.Context, scheme string, f SubscriptionInitializeFunc) error {
+func RegisterSubscriber(ctx context.Context, scheme string, f SubscriberInitializeFunc) error {
 
 	err := ensureSpatialRoster()
 
@@ -42,7 +42,7 @@ func RegisterSubscription(ctx context.Context, scheme string, f SubscriptionInit
 		return err
 	}
 
-	return subscriptions.Register(ctx, scheme, f)
+	return subscribers.Register(ctx, scheme, f)
 }
 
 func Schemes() []string {
@@ -56,7 +56,7 @@ func Schemes() []string {
 		return schemes
 	}
 
-	for _, dr := range subscriptions.Drivers(ctx) {
+	for _, dr := range subscribers.Drivers(ctx) {
 		scheme := fmt.Sprintf("%s://", strings.ToLower(dr))
 		schemes = append(schemes, scheme)
 	}
@@ -65,7 +65,7 @@ func Schemes() []string {
 	return schemes
 }
 
-func NewSubscription(ctx context.Context, uri string) (Subscription, error) {
+func NewSubscriber(ctx context.Context, uri string) (Subscriber, error) {
 
 	u, err := url.Parse(uri)
 
@@ -75,12 +75,12 @@ func NewSubscription(ctx context.Context, uri string) (Subscription, error) {
 
 	scheme := u.Scheme
 
-	i, err := subscriptions.Driver(ctx, scheme)
+	i, err := subscribers.Driver(ctx, scheme)
 
 	if err != nil {
 		return nil, err
 	}
 
-	f := i.(SubscriptionInitializeFunc)
+	f := i.(SubscriberInitializeFunc)
 	return f(ctx, uri)
 }

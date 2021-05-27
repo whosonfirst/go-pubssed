@@ -6,7 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/whosonfirst/go-pubssed/broker"
-	"github.com/whosonfirst/go-pubssed/subscription"
+	"github.com/sfomuseum/go-pubsub/subscriber"
 	"log"
 	"net/http"
 	"os"
@@ -29,7 +29,7 @@ func main() {
 
 	ctx := context.Background()
 
-	sub, err := subscription.NewSubscription(ctx, *subscription_uri)
+	sub, err := subscriber.NewSubscriber(ctx, *subscription_uri)
 
 	if err != nil {
 		log.Fatalf("Failed to create subscription for '%s', %v", *subscription_uri, err)
