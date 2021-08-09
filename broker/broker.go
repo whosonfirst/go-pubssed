@@ -29,8 +29,8 @@ func NewBroker() (*Broker, error) {
 
 func (b *Broker) Start(ctx context.Context, sub subscriber.Subscriber) error {
 
-	// set up the SSE monitor	
-	
+	// set up the SSE monitor
+
 	go func() {
 
 		for {
@@ -38,6 +38,7 @@ func (b *Broker) Start(ctx context.Context, sub subscriber.Subscriber) error {
 			select {
 
 			case <-ctx.Done():
+				// log.Println("Done")
 				return
 
 			case s := <-b.new_clients:
@@ -90,12 +91,12 @@ func (b *Broker) HandlerFunc() (http.HandlerFunc, error) {
 
 		b.new_clients <- messageChan
 
-		notify := w.(http.CloseNotifier).CloseNotify()
+		notify := r.Context().Done()
 
 		go func() {
 			<-notify
-			b.bunk_clients <- messageChan
 			log.Println("HTTP connection just closed.")
+			b.bunk_clients <- messageChan
 		}()
 
 		// Set the headers related to event streaming.
@@ -104,32 +105,16 @@ func (b *Broker) HandlerFunc() (http.HandlerFunc, error) {
 		w.Header().Set("Cache-Control", "no-cache")
 		w.Header().Set("Connection", "keep-alive")
 
+		// https://stackoverflow.com/questions/27898622/server-sent-events-stopped-work-after-enabling-ssl-on-proxy
+		// https://www.nginx.com/resources/wiki/start/topics/examples/x-accel/#X-Accel-Buffering
+
+		w.Header().Set("X-Accel-Buffering", "no")
+
 		// For CORS stuff please use https://github.com/rs/cors
-		
-		// Don't close the connection, instead loop 10 times,
-		// sending messages and flushing the response each time
-		// there is a new message to send along.
-		//
-		// NOTE: we could loop endlessly; however, then you
-		// could not easily detect clients that dettach and the
-		// server would continue to send them messages long after
-		// they're gone due to the "keep-alive" header.  One of
-		// the nifty aspects of SSE is that clients automatically
-		// reconnect when they lose their connection.
-		//
-		// A better way to do this is to use the CloseNotifier
-		// interface that will appear in future releases of
-		// Go (this is written as of 1.0.3):
-		// https://code.google.com/p/go/source/detail?name=3292433291b2
 
 		for {
 
-			msg, open := <-messageChan
-
-			if !open {
-				log.Println("NO MESSAGE")
-				break
-			}
+			msg := <-messageChan
 
 			fmt.Fprintf(w, "data: %s\n\n", msg)
 			fl.Flush()
