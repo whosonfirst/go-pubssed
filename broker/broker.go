@@ -49,8 +49,10 @@ func (b *Broker) Start(ctx context.Context, sub subscriber.Subscriber) error {
 			case s := <-b.bunk_clients:
 
 				delete(b.clients, s)
-				close(s)
-
+				// We used to explicitly close(s) here. We should
+				// really have been closing it below in the req.Context().Done()
+				// block. Either way, don't since it is unnecessary and
+				// seems to make Go start eating 100% of CPU...
 				// log.Println("Removed client")
 
 			case msg := <-b.messages:
@@ -97,6 +99,8 @@ func (b *Broker) HandlerFunc() (http.HandlerFunc, error) {
 			<-notify
 			log.Println("HTTP connection just closed.")
 			b.bunk_clients <- messageChan
+			// Don't close(messageChan) since it's unnecessary and
+			// seems to cause CPU to spike to 100% Computers, amirite?
 		}()
 
 		// Set the headers related to event streaming.
