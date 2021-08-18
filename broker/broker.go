@@ -82,6 +82,12 @@ func (b *Broker) HandlerFunc() (http.HandlerFunc, error) {
 
 	f := func(w http.ResponseWriter, r *http.Request) {
 
+		log.Println("SSE start handler")
+
+		defer func() {
+			log.Println("SSE finish handler")
+		}()
+
 		fl, ok := w.(http.Flusher)
 
 		if !ok {
@@ -118,13 +124,17 @@ func (b *Broker) HandlerFunc() (http.HandlerFunc, error) {
 
 		for {
 
-			msg := <-messageChan
+			select {
+			case <-notify:
+				log.Println("SSE stop handler")
+				return
+			case msg := <-messageChan:
 
-			fmt.Fprintf(w, "data: %s\n\n", msg)
-			fl.Flush()
+				fmt.Fprintf(w, "data: %s\n\n", msg)
+				fl.Flush()
+			}
 		}
 
-		log.Println("Finished HTTP request at ", r.URL.Path)
 	}
 
 	return http.HandlerFunc(f), nil
