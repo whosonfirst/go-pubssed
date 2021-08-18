@@ -6,6 +6,7 @@ import (
 	"github.com/sfomuseum/go-pubsub/subscriber"
 	"log"
 	"net/http"
+	"os"
 )
 
 type Broker struct {
@@ -13,15 +14,19 @@ type Broker struct {
 	messages     chan string
 	new_clients  chan chan string
 	bunk_clients chan chan string
+	Logger       *log.Logger
 }
 
 func NewBroker() (*Broker, error) {
+
+	logger := log.New(os.Stdout, "[pubssed] ", log.LstdFlags)
 
 	b := Broker{
 		clients:      make(map[chan string]bool),
 		messages:     make(chan string),
 		new_clients:  make(chan (chan string)),
 		bunk_clients: make(chan (chan string)),
+		Logger:       logger,
 	}
 
 	return &b, nil
@@ -82,10 +87,10 @@ func (b *Broker) HandlerFunc() (http.HandlerFunc, error) {
 
 	f := func(w http.ResponseWriter, r *http.Request) {
 
-		log.Println("SSE start handler")
+		b.Logger.Println("SSE start handler")
 
 		defer func() {
-			log.Println("SSE finish handler")
+			b.Logger.Println("SSE finish handler")
 		}()
 
 		fl, ok := w.(http.Flusher)
@@ -103,7 +108,7 @@ func (b *Broker) HandlerFunc() (http.HandlerFunc, error) {
 
 		go func() {
 			<-notify
-			log.Println("HTTP connection just closed.")
+			b.Logger.Println("SSE HTTP connection just closed.")
 			b.bunk_clients <- messageChan
 			// Don't close(messageChan) since it's unnecessary and
 			// seems to cause CPU to spike to 100% Computers, amirite?
@@ -126,10 +131,9 @@ func (b *Broker) HandlerFunc() (http.HandlerFunc, error) {
 
 			select {
 			case <-notify:
-				log.Println("SSE stop handler")
+				b.Logger.Println("SSE stop handler")
 				return
 			case msg := <-messageChan:
-
 				fmt.Fprintf(w, "data: %s\n\n", msg)
 				fl.Flush()
 			}
