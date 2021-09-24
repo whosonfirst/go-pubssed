@@ -99,7 +99,7 @@ func (b *Broker) HandlerFuncWithTimeout(ttl *time.Duration) (http.HandlerFunc, e
 		}
 
 		defer func() {
-			b.Logger.Println("SSE finish handler")
+			b.Logger.Printf("SSE finish handler from %s", r.RemoteAddr)
 		}()
 
 		fl, ok := w.(http.Flusher)
@@ -127,7 +127,7 @@ func (b *Broker) HandlerFuncWithTimeout(ttl *time.Duration) (http.HandlerFunc, e
 
 		go func() {
 			<-notify
-			b.Logger.Println("SSE HTTP connection just closed.")
+			b.Logger.Println("Received ctx.Done notification.")
 			b.bunk_clients <- messageChan
 			// Don't close(messageChan) since it's unnecessary and
 			// seems to cause CPU to spike to 100% Computers, amirite?
