@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 )
 
 type Broker struct {
@@ -84,13 +85,21 @@ func (b *Broker) Start(ctx context.Context, sub subscriber.Subscriber) error {
 }
 
 func (b *Broker) HandlerFunc() (http.HandlerFunc, error) {
+	return b.HandlerFuncWithTimeout(nil)
+}
+
+func (b *Broker) HandlerFuncWithTimeout(ttl *time.Duration) (http.HandlerFunc, error) {
 
 	f := func(w http.ResponseWriter, r *http.Request) {
 
-		b.Logger.Println("SSE start handler")
+		if ttl != nil {
+			b.Logger.Printf("SSE start handler from %s with TTL %v", r.RemoteAddr, ttl)
+		} else {
+			b.Logger.Printf("SSE start handler from %s", r.RemoteAddr)
+		}
 
 		defer func() {
-			b.Logger.Println("SSE finish handler")
+			b.Logger.Printf("SSE finish handler from %s", r.RemoteAddr)
 		}()
 
 		fl, ok := w.(http.Flusher)
@@ -104,11 +113,21 @@ func (b *Broker) HandlerFunc() (http.HandlerFunc, error) {
 
 		b.new_clients <- messageChan
 
-		notify := r.Context().Done()
+		ctx := r.Context()
+
+		if ttl != nil {
+
+			c, cancel := context.WithTimeout(ctx, *ttl)
+			defer cancel()
+
+			ctx = c
+		}
+
+		notify := ctx.Done()
 
 		go func() {
 			<-notify
-			b.Logger.Println("SSE HTTP connection just closed.")
+			b.Logger.Println("Received ctx.Done notification.")
 			b.bunk_clients <- messageChan
 			// Don't close(messageChan) since it's unnecessary and
 			// seems to cause CPU to spike to 100% Computers, amirite?
