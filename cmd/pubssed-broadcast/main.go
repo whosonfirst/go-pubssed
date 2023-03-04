@@ -4,10 +4,11 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/go-redis/redis/v8"
 	_ "log"
 	"os"
 	"time"
+
+	"github.com/go-redis/redis/v8"
 )
 
 func main() {

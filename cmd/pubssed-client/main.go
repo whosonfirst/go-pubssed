@@ -3,11 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/whosonfirst/go-pubssed/listener"
 	"log"
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/whosonfirst/go-pubssed/listener"
 )
 
 func main() {

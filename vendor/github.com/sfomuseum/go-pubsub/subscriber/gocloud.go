@@ -44,13 +44,13 @@ func NewGoCloudSubscriber(ctx context.Context, uri string) (Subscriber, error) {
 func (sub *GoCloudSubscriber) Listen(ctx context.Context, msg_ch chan string) error {
 
 	for {
-		
+
 		msg, err := sub.subscription.Receive(ctx)
-		
+
 		if err != nil {
 			return err
 		}
-	
+
 		go msg.Ack()
 
 		msg_ch <- string(msg.Body)

@@ -3,11 +3,12 @@ package broker
 import (
 	"context"
 	"fmt"
-	"github.com/sfomuseum/go-pubsub/subscriber"
 	"log"
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/sfomuseum/go-pubsub/subscriber"
 )
 
 type Broker struct {

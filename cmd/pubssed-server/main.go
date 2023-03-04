@@ -5,11 +5,12 @@ import (
 	"embed"
 	"flag"
 	"fmt"
-	"github.com/sfomuseum/go-pubsub/subscriber"
-	"github.com/whosonfirst/go-pubssed/broker"
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/sfomuseum/go-pubsub/subscriber"
+	"github.com/whosonfirst/go-pubssed/broker"
 )
 
 //go:embed index.html index.js
