@@ -16,7 +16,11 @@ type RedisSubscriber struct {
 
 func init() {
 	ctx := context.Background()
-	RegisterSubscriber(ctx, "redis", NewRedisSubscriber)
+	RegisterRedisSubscribers(ctx)
+}
+
+func RegisterRedisSubscribers(ctx context.Context) error {	
+	return RegisterSubscriber(ctx, "redis", NewRedisSubscriber)
 }
 
 func NewRedisSubscriber(ctx context.Context, uri string) (Subscriber, error) {

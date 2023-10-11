@@ -13,7 +13,11 @@ type TickerSubscriber struct {
 
 func init() {
 	ctx := context.Background()
-	RegisterSubscriber(ctx, "ticker", NewTickerSubscriber)
+	RegisterTickerSubscribers(ctx)
+}
+
+func RegisterTickerSubscribers(ctx context.Context) error {
+	return RegisterSubscriber(ctx, "ticker", NewTickerSubscriber)
 }
 
 func NewTickerSubscriber(ctx context.Context, uri string) (Subscriber, error) {
