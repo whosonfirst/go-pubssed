@@ -3,9 +3,9 @@ package subscriber
 import (
 	"context"
 	"fmt"
-	"github.com/go-redis/redis/v8"
-	"log"
 	"net/url"
+
+	"github.com/go-redis/redis/v8"
 )
 
 type RedisSubscriber struct {
@@ -16,7 +16,11 @@ type RedisSubscriber struct {
 
 func init() {
 	ctx := context.Background()
-	RegisterSubscriber(ctx, "redis", NewRedisSubscriber)
+	RegisterRedisSubscribers(ctx)
+}
+
+func RegisterRedisSubscribers(ctx context.Context) error {	
+	return RegisterSubscriber(ctx, "redis", NewRedisSubscriber)
 }
 
 func NewRedisSubscriber(ctx context.Context, uri string) (Subscriber, error) {
@@ -54,11 +58,13 @@ func (s *RedisSubscriber) Listen(ctx context.Context, messages_ch chan string) e
 
 	for {
 
-		i, _ := pubsub_client.Receive(ctx)
-		// log.Println("received message", i)
+		i, err := pubsub_client.Receive(ctx)
+
+		if err != nil {
+			return fmt.Errorf("Failed to receive message, %w", err)
+		}
 
 		if msg, _ := i.(*redis.Message); msg != nil {
-			log.Println("relay message", msg.Payload)
 			messages_ch <- msg.Payload
 		}
 	}
