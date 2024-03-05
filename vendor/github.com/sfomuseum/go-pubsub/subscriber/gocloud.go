@@ -4,7 +4,7 @@ package subscriber
 
 import (
 	"context"
-	
+
 	"gocloud.dev/pubsub"
 )
 
@@ -20,7 +20,7 @@ func init() {
 }
 
 func RegisterGoCloudSubscribers(ctx context.Context) error {
-	
+
 	for _, scheme := range pubsub.DefaultURLMux().SubscriptionSchemes() {
 
 		err := RegisterSubscriber(ctx, scheme, NewGoCloudSubscriber)
