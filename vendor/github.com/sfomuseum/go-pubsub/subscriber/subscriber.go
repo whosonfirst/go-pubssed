@@ -8,7 +8,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/aaronland/go-roster"	
+	"github.com/aaronland/go-roster"
 )
 
 // In principle this could also be done with a sync.OnceFunc call but that will
@@ -62,7 +62,7 @@ func RegisterSubscriber(ctx context.Context, scheme string, f SubscriberInitiali
 	if exists {
 		return nil
 	}
-	
+
 	err = subscribers.Register(ctx, scheme, f)
 
 	if err != nil {
@@ -70,7 +70,7 @@ func RegisterSubscriber(ctx context.Context, scheme string, f SubscriberInitiali
 	}
 
 	register_map[scheme] = true
-	return nil	
+	return nil
 }
 
 func SubscriberSchemes() []string {

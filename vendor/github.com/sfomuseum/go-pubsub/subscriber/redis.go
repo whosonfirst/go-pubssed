@@ -6,6 +6,7 @@ import (
 	"net/url"
 
 	"github.com/go-redis/redis/v8"
+	"github.com/sfomuseum/go-pubsub"
 )
 
 type RedisSubscriber struct {
@@ -19,7 +20,7 @@ func init() {
 	RegisterRedisSubscribers(ctx)
 }
 
-func RegisterRedisSubscribers(ctx context.Context) error {	
+func RegisterRedisSubscribers(ctx context.Context) error {
 	return RegisterSubscriber(ctx, "redis", NewRedisSubscriber)
 }
 
@@ -28,19 +29,17 @@ func NewRedisSubscriber(ctx context.Context, uri string) (Subscriber, error) {
 	u, err := url.Parse(uri)
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Failed to parse URI, %w", err)
 	}
 
-	q := u.Query()
+	endpoint, channel, err := pubsub.RedisConfigFromURL(u)
 
-	host := q.Get("host")
-	port := q.Get("port")
-	channel := q.Get("channel")
-
-	addr := fmt.Sprintf("%s:%s", host, port)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to derive Redis config from URI, %w", err)
+	}
 
 	redis_client := redis.NewClient(&redis.Options{
-		Addr: addr,
+		Addr: endpoint,
 	})
 
 	s := &RedisSubscriber{
