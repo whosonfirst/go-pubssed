@@ -37,6 +37,7 @@ func main() {
 
 	ctx := context.Background()
 
+	slog.Debug("SERVER", "sub", *subscription_uri)
 	sub, err := subscriber.NewSubscriber(ctx, *subscription_uri)
 
 	if err != nil {

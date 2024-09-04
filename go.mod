@@ -2,12 +2,9 @@ module github.com/whosonfirst/go-pubssed
 
 go 1.23
 
-replace github.com/hpcloud/tail v1.0.0 => github.com/sfomuseum/tail v1.0.1
+replace github.com/hpcloud/tail v1.0.0 => github.com/sfomuseum/tail v1.0.2
 
-require (
-	github.com/go-redis/redis/v8 v8.11.5
-	github.com/sfomuseum/go-pubsub v0.0.17
-)
+require github.com/sfomuseum/go-pubsub v0.0.18
 
 require (
 	github.com/aaronland/go-aws-auth v1.6.4 // indirect
@@ -40,6 +37,7 @@ require (
 	github.com/googleapis/gax-go/v2 v2.13.0 // indirect
 	github.com/hpcloud/tail v1.0.0 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
+	github.com/redis/go-redis/v9 v9.6.1 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	gocloud.dev v0.39.0 // indirect
 	golang.org/x/net v0.28.0 // indirect

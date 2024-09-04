@@ -34,7 +34,7 @@ func (b *Broker) Start(ctx context.Context, sub subscriber.Subscriber) error {
 	// set up the SSE monitor
 
 	logger := slog.Default()
-	logger.Debug("Start broker")
+	logger.Debug("Start broker", "subscriber", fmt.Sprintf("%T", sub))
 
 	go func() {
 
@@ -75,7 +75,7 @@ func (b *Broker) Start(ctx context.Context, sub subscriber.Subscriber) error {
 	go func() {
 
 		// something something error handling...
-		logger.Debug("Listen")
+		logger.Debug("Listen for pub sub messages")
 		sub.Listen(ctx, b.messages)
 	}()
 
