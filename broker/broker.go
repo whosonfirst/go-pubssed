@@ -3,9 +3,8 @@ package broker
 import (
 	"context"
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/sfomuseum/go-pubsub/subscriber"
@@ -16,19 +15,15 @@ type Broker struct {
 	messages     chan string
 	new_clients  chan chan string
 	bunk_clients chan chan string
-	Logger       *log.Logger
 }
 
 func NewBroker() (*Broker, error) {
-
-	logger := log.New(os.Stdout, "[pubssed] ", log.LstdFlags)
 
 	b := Broker{
 		clients:      make(map[chan string]bool),
 		messages:     make(chan string),
 		new_clients:  make(chan (chan string)),
 		bunk_clients: make(chan (chan string)),
-		Logger:       logger,
 	}
 
 	return &b, nil
@@ -38,6 +33,9 @@ func (b *Broker) Start(ctx context.Context, sub subscriber.Subscriber) error {
 
 	// set up the SSE monitor
 
+	logger := slog.Default()
+	logger.Debug("Start broker")
+
 	go func() {
 
 		for {
@@ -45,13 +43,12 @@ func (b *Broker) Start(ctx context.Context, sub subscriber.Subscriber) error {
 			select {
 
 			case <-ctx.Done():
-				// log.Println("Done")
+				logger.Debug("Broker received done signal, exiting")
 				return
 
 			case s := <-b.new_clients:
 
 				b.clients[s] = true
-				// log.Println("Added new client")
 
 			case s := <-b.bunk_clients:
 
@@ -64,11 +61,11 @@ func (b *Broker) Start(ctx context.Context, sub subscriber.Subscriber) error {
 
 			case msg := <-b.messages:
 
+				logger.Debug("Broadcast message to clients", "count", len(b.clients))
+
 				for s, _ := range b.clients {
 					s <- msg
 				}
-
-				// log.Printf("Broadcast message to %d clients", len(b.clients))
 			}
 		}
 	}()
@@ -78,7 +75,7 @@ func (b *Broker) Start(ctx context.Context, sub subscriber.Subscriber) error {
 	go func() {
 
 		// something something error handling...
-
+		logger.Debug("Listen")
 		sub.Listen(ctx, b.messages)
 	}()
 
@@ -93,19 +90,24 @@ func (b *Broker) HandlerFuncWithTimeout(ttl *time.Duration) (http.HandlerFunc, e
 
 	f := func(w http.ResponseWriter, r *http.Request) {
 
+		logger := slog.Default()
+		logger = logger.With("remote addr", r.RemoteAddr)
+
 		if ttl != nil {
-			b.Logger.Printf("SSE start handler from %s with TTL %v", r.RemoteAddr, ttl)
-		} else {
-			b.Logger.Printf("SSE start handler from %s", r.RemoteAddr)
+			logger = logger.With("ttl", ttl)
 		}
 
+		t1 := time.Now()
+		logger.Debug("Start broker HTTP handler", "time", t1)
+
 		defer func() {
-			b.Logger.Printf("SSE finish handler from %s", r.RemoteAddr)
+			logger.Debug("Finish handler", "time", time.Since(t1))
 		}()
 
 		fl, ok := w.(http.Flusher)
 
 		if !ok {
+			logger.Error("Writer does not support streaming")
 			http.Error(w, "Streaming unsupported!", http.StatusInternalServerError)
 			return
 		}
@@ -128,7 +130,6 @@ func (b *Broker) HandlerFuncWithTimeout(ttl *time.Duration) (http.HandlerFunc, e
 
 		go func() {
 			<-notify
-			b.Logger.Println("Received ctx.Done notification.")
 			b.bunk_clients <- messageChan
 			// Don't close(messageChan) since it's unnecessary and
 			// seems to cause CPU to spike to 100% Computers, amirite?
@@ -151,7 +152,7 @@ func (b *Broker) HandlerFuncWithTimeout(ttl *time.Duration) (http.HandlerFunc, e
 
 			select {
 			case <-notify:
-				b.Logger.Println("SSE stop handler")
+				logger.Debug("Handler received signal, stopping handler")
 				return
 			case msg := <-messageChan:
 				fmt.Fprintf(w, "data: %s\n\n", msg)

@@ -15,9 +15,10 @@ Documentation is incomplete still.
 ```
 import (
         "context"
+	"net/http"
+
 	"github.com/sfomuseum/go-pubsub/subscriber"	
 	"github.com/whosonfirst/go-pubssed/broker"
-	"net/http"
 )
 
 ctx := context.Background()
@@ -40,8 +41,9 @@ _Note that all error handling has been removed for the sake of brevity._
 
 ```
 import (
-	"github.com/whosonfirst/go-pubssed/listener"
 	"log"
+
+	"github.com/whosonfirst/go-pubssed/listener"
 )
 
 callback := func(msg string) error {

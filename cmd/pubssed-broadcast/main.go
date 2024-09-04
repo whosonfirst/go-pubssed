@@ -4,7 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	_ "log"
+	"log/slog"
 	"os"
 	"time"
 
@@ -19,7 +19,14 @@ func main() {
 	var redis_port = flag.Int("redis-port", 6379, "Redis port")
 	var redis_channel = flag.String("redis-channel", "pubssed", "Redis channel")
 
+	var verbose = flag.Bool("verbose", false, "Enable verbose (debug) logging")
+
 	flag.Parse()
+
+	if *verbose {
+		slog.SetLogLoggerLevel(slog.LevelDebug)
+		slog.Debug("Verbose logging enabled")
+	}
 
 	ctx := context.Background()
 
@@ -37,12 +44,16 @@ func main() {
 		ch <- true
 	}
 
+	logger := slog.Default()
+	logger = logger.With("channel", *redis_channel)
+
 	for {
 
 		<-ch
 
 		now := fmt.Sprintf("%v", time.Now())
-		// log.Println(*redis_channel, now)
+		logger.Info("Publish", "message", now)
+
 		redis_client.Publish(ctx, *redis_channel, now)
 
 		ch <- true
