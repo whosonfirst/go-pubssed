@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
 
@@ -24,12 +25,19 @@ func main() {
 
 	var subscription_uri = flag.String("subscription-uri", "redis://?host=localhost&port=6379&channel=pubssed", "...")
 
+	var verbose = flag.Bool("verbose", false, "Enable verbose (debug) logging")
 	enable_demo := flag.Bool("enable-demo", false, "...")
 
 	flag.Parse()
 
+	if *verbose {
+		slog.SetLogLoggerLevel(slog.LevelDebug)
+		slog.Debug("Verbose logging enabled")
+	}
+
 	ctx := context.Background()
 
+	slog.Debug("SERVER", "sub", *subscription_uri)
 	sub, err := subscriber.NewSubscriber(ctx, *subscription_uri)
 
 	if err != nil {

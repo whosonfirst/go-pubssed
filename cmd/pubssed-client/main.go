@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"time"
@@ -18,7 +19,14 @@ func main() {
 	var append_root = flag.String("append-root", ".", "The destination to write log files if the 'append' callback is invoked.")
 	var retry = flag.Bool("retry-on-eof", false, "Try to reconnect to the SSE endpoint if an EOF error is triggered. This is sometimes necessary if an SSE endpoint is configured with a too-short HTTP timeout (for example if running behind an AWS load balancer).")
 
+	var verbose = flag.Bool("verbose", false, "Enable verbose (debug) logging")
+
 	flag.Parse()
+
+	if *verbose {
+		slog.SetLogLoggerLevel(slog.LevelDebug)
+		slog.Debug("Verbose logging enabled")
+	}
 
 	if *endpoint == "" {
 		log.Fatal("Missing pubssed endpoint")
