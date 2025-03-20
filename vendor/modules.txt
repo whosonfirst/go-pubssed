@@ -206,7 +206,7 @@ github.com/hpcloud/tail/winfile
 # github.com/jmespath/go-jmespath v0.4.0
 ## explicit; go 1.14
 github.com/jmespath/go-jmespath
-# github.com/redis/go-redis/v9 v9.6.1
+# github.com/redis/go-redis/v9 v9.6.3
 ## explicit; go 1.18
 github.com/redis/go-redis/v9
 github.com/redis/go-redis/v9/internal
