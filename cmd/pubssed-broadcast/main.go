@@ -32,7 +32,7 @@ func main() {
 	pub, err := publisher.NewPublisher(ctx, *publisher_uri)
 
 	if err != nil {
-		log.Fatalf("Failed to create publisher, %w", err)
+		log.Fatalf("Failed to create publisher, %v", err)
 	}
 
 	defer pub.Close()

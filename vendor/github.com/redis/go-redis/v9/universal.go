@@ -61,9 +61,8 @@ type UniversalOptions struct {
 	RouteByLatency bool
 	RouteRandomly  bool
 
-	// The sentinel master name.
-	// Only failover clients.
-
+	// MasterName is the sentinel master name.
+	// Only for failover clients.
 	MasterName string
 
 	// DisableIndentity - Disable set-lib on connect.
@@ -79,6 +78,8 @@ type UniversalOptions struct {
 	DisableIdentity bool
 
 	IdentitySuffix string
+	UnstableResp3  bool
+
 }
 
 // Cluster returns cluster options created from the universal options.
@@ -126,6 +127,7 @@ func (o *UniversalOptions) Cluster() *ClusterOptions {
 		DisableIdentity:  o.DisableIdentity,
 		DisableIndentity: o.DisableIndentity,
 		IdentitySuffix:   o.IdentitySuffix,
+		UnstableResp3:    o.UnstableResp3,
 	}
 }
 
@@ -170,11 +172,10 @@ func (o *UniversalOptions) Failover() *FailoverOptions {
 
 		TLSConfig: o.TLSConfig,
 
-		ReplicaOnly: o.ReadOnly,
-
 		DisableIdentity:  o.DisableIdentity,
 		DisableIndentity: o.DisableIndentity,
 		IdentitySuffix:   o.IdentitySuffix,
+		UnstableResp3:    o.UnstableResp3,
 	}
 }
 
@@ -219,6 +220,7 @@ func (o *UniversalOptions) Simple() *Options {
 		DisableIdentity:  o.DisableIdentity,
 		DisableIndentity: o.DisableIndentity,
 		IdentitySuffix:   o.IdentitySuffix,
+		UnstableResp3:    o.UnstableResp3,
 	}
 }
 
