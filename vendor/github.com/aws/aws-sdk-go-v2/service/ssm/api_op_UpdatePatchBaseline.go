@@ -109,10 +109,19 @@ type UpdatePatchBaselineInput struct {
 	//
 	// BLOCK  All OSs: Packages in the rejected patches list, and packages that
 	// include them as dependencies, aren't installed by Patch Manager under any
-	// circumstances. If a package was installed before it was added to the rejected
-	// patches list, or is installed outside of Patch Manager afterward, it's
-	// considered noncompliant with the patch baseline and its status is reported as
-	// INSTALLED_REJECTED .
+	// circumstances.
+	//
+	// State value assignment for patch compliance:
+	//
+	//   - If a package was installed before it was added to the rejected patches
+	//   list, or is installed outside of Patch Manager afterward, it's considered
+	//   noncompliant with the patch baseline and its status is reported as
+	//   INSTALLED_REJECTED .
+	//
+	//   - If an update attempts to install a dependency package that is now rejected
+	//   by the baseline, when previous versions of the package were not rejected, the
+	//   package being updated is reported as MISSING for SCAN operations and as FAILED
+	//   for INSTALL operations.
 	RejectedPatchesAction types.PatchAction
 
 	// If True, then all fields that are required by the CreatePatchBaseline operation are also required
@@ -225,7 +234,7 @@ func (c *Client) addOperationUpdatePatchBaselineMiddlewares(stack *middleware.St
 	if err = addComputePayloadSHA256(stack); err != nil {
 		return err
 	}
-	if err = addRetry(stack, options); err != nil {
+	if err = addRetry(stack, options, c); err != nil {
 		return err
 	}
 	if err = addRawResponseToMetadata(stack); err != nil {
@@ -247,9 +256,6 @@ func (c *Client) addOperationUpdatePatchBaselineMiddlewares(stack *middleware.St
 		return err
 	}
 	if err = addSetLegacyContextSigningOptionsMiddleware(stack); err != nil {
-		return err
-	}
-	if err = addTimeOffsetBuild(stack, c); err != nil {
 		return err
 	}
 	if err = addUserAgentRetryMode(stack, options); err != nil {
@@ -279,16 +285,13 @@ func (c *Client) addOperationUpdatePatchBaselineMiddlewares(stack *middleware.St
 	if err = addDisableHTTPSMiddleware(stack, options); err != nil {
 		return err
 	}
-	if err = addSpanInitializeStart(stack); err != nil {
+	if err = addInterceptBeforeRetryLoop(stack, options); err != nil {
 		return err
 	}
-	if err = addSpanInitializeEnd(stack); err != nil {
+	if err = addInterceptAttempt(stack, options); err != nil {
 		return err
 	}
-	if err = addSpanBuildRequestStart(stack); err != nil {
-		return err
-	}
-	if err = addSpanBuildRequestEnd(stack); err != nil {
+	if err = addInterceptors(stack, options); err != nil {
 		return err
 	}
 	return nil

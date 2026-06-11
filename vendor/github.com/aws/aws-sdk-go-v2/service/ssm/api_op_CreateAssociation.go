@@ -82,6 +82,21 @@ type CreateAssociationInput struct {
 	// [>About target updates with Automation runbooks]: https://docs.aws.amazon.com/systems-manager/latest/userguide/state-manager-about.html#runbook-target-updates
 	ApplyOnlyAtCronInterval bool
 
+	// A role used by association to take actions on your behalf. State Manager will
+	// assume this role and call required APIs when dispatching configurations to
+	// nodes. If not specified, [service-linked role for Systems Manager]will be used by default.
+	//
+	// It is recommended that you define a custom IAM role so that you have full
+	// control of the permissions that State Manager has when taking actions on your
+	// behalf.
+	//
+	// Service-linked role support in State Manager is being phased out. Associations
+	// relying on service-linked role may require updates in the future to continue
+	// functioning properly.
+	//
+	// [service-linked role for Systems Manager]: https://docs.aws.amazon.com/systems-manager/latest/userguide/using-service-linked-roles.html
+	AssociationDispatchAssumeRole *string
+
 	// Specify a descriptive name for the association.
 	AssociationName *string
 
@@ -214,6 +229,8 @@ type CreateAssociationInput struct {
 	// A location is a combination of Amazon Web Services Regions and Amazon Web
 	// Services accounts where you want to run the association. Use this action to
 	// create an association in multiple Regions and multiple accounts.
+	//
+	// The IncludeChildOrganizationUnits parameter is not supported by State Manager.
 	TargetLocations []types.TargetLocation
 
 	// A key-value mapping of document parameters to target resources. Both Targets
@@ -278,7 +295,7 @@ func (c *Client) addOperationCreateAssociationMiddlewares(stack *middleware.Stac
 	if err = addComputePayloadSHA256(stack); err != nil {
 		return err
 	}
-	if err = addRetry(stack, options); err != nil {
+	if err = addRetry(stack, options, c); err != nil {
 		return err
 	}
 	if err = addRawResponseToMetadata(stack); err != nil {
@@ -300,9 +317,6 @@ func (c *Client) addOperationCreateAssociationMiddlewares(stack *middleware.Stac
 		return err
 	}
 	if err = addSetLegacyContextSigningOptionsMiddleware(stack); err != nil {
-		return err
-	}
-	if err = addTimeOffsetBuild(stack, c); err != nil {
 		return err
 	}
 	if err = addUserAgentRetryMode(stack, options); err != nil {
@@ -332,16 +346,13 @@ func (c *Client) addOperationCreateAssociationMiddlewares(stack *middleware.Stac
 	if err = addDisableHTTPSMiddleware(stack, options); err != nil {
 		return err
 	}
-	if err = addSpanInitializeStart(stack); err != nil {
+	if err = addInterceptBeforeRetryLoop(stack, options); err != nil {
 		return err
 	}
-	if err = addSpanInitializeEnd(stack); err != nil {
+	if err = addInterceptAttempt(stack, options); err != nil {
 		return err
 	}
-	if err = addSpanBuildRequestStart(stack); err != nil {
-		return err
-	}
-	if err = addSpanBuildRequestEnd(stack); err != nil {
+	if err = addInterceptors(stack, options); err != nil {
 		return err
 	}
 	return nil

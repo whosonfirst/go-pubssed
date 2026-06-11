@@ -51,10 +51,7 @@ func Split(n int, opts *Options) []int {
 	// to [9, 1]; it could be [5, 5].
 	var batches []int
 	for n >= o.MinBatchSize && len(batches) < o.MaxHandlers {
-		b := o.MaxBatchSize
-		if b > n {
-			b = n
-		}
+		b := min(o.MaxBatchSize, n)
 		batches = append(batches, b)
 		n -= b
 	}
@@ -91,6 +88,7 @@ type Options struct {
 	// Maximum number of concurrent handlers. Defaults to 1.
 	MaxHandlers int
 	// Minimum size of a batch. Defaults to 1.
+	// May be ignored during shutdown.
 	MinBatchSize int
 	// Maximum size of a batch. 0 means no limit.
 	MaxBatchSize int
@@ -199,26 +197,33 @@ func (b *Batcher) AddNoWait(item any) <-chan error {
 	b.pending = append(b.pending, waiter{item, c})
 	if b.nHandlers < b.opts.MaxHandlers {
 		// If we can start a handler, do so with the item just added and any others that are pending.
-		batch := b.nextBatch()
-		if batch != nil {
-			b.wg.Add(1)
-			go func() {
-				b.callHandler(batch)
-				b.wg.Done()
-			}()
-			b.nHandlers++
-		}
+		b.handleBatch(b.nextBatch())
 	}
 	// If we can't start a handler, then one of the currently running handlers will
 	// take our item.
 	return c
 }
 
+// Requires b.mu be held.
+func (b *Batcher) handleBatch(batch []waiter) {
+	if len(batch) == 0 {
+		return
+	}
+	b.wg.Add(1)
+	go func() {
+		b.callHandler(batch)
+		b.wg.Done()
+	}()
+	b.nHandlers++
+}
+
 // nextBatch returns the batch to process, and updates b.pending.
 // It returns nil if there's no batch ready for processing.
 // b.mu must be held.
 func (b *Batcher) nextBatch() []waiter {
-	if len(b.pending) < b.opts.MinBatchSize {
+	// If we're not shutting down, respect minimums.  If we're shutting down
+	// though, we ignore minimums to make sure everything is flushed.
+	if !b.shutdown && len(b.pending) < b.opts.MinBatchSize {
 		return nil
 	}
 
@@ -282,6 +287,12 @@ func (b *Batcher) callHandler(batch []waiter) {
 func (b *Batcher) Shutdown() {
 	b.mu.Lock()
 	b.shutdown = true
+	// If there aren't any handlers running, there might be a partial
+	// batch. Make sure it gets flushed even if it hasn't reached the
+	// minimums.
+	if b.nHandlers == 0 {
+		b.handleBatch(b.nextBatch())
+	}
 	b.mu.Unlock()
 	b.wg.Wait()
 }

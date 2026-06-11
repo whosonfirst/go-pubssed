@@ -14,7 +14,7 @@ import (
 // Sets the roles for an identity pool. These roles are used when making calls to GetCredentialsForIdentity
 // action.
 //
-// You must use AWS Developer credentials to call this API.
+// You must use Amazon Web Services developer credentials to call this operation.
 func (c *Client) SetIdentityPoolRoles(ctx context.Context, params *SetIdentityPoolRolesInput, optFns ...func(*Options)) (*SetIdentityPoolRolesOutput, error) {
 	if params == nil {
 		params = &SetIdentityPoolRolesInput{}
@@ -46,8 +46,8 @@ type SetIdentityPoolRolesInput struct {
 
 	// How users for a specific identity provider are to mapped to roles. This is a
 	// string to RoleMappingobject map. The string identifies the identity provider, for example,
-	// "graph.facebook.com" or
-	// "cognito-idp.us-east-1.amazonaws.com/us-east-1_abcdefghi:app_client_id".
+	// graph.facebook.com or
+	// cognito-idp.us-east-1.amazonaws.com/us-east-1_abcdefghi:app_client_id .
 	//
 	// Up to 25 rules can be specified per identity provider.
 	RoleMappings map[string]types.RoleMapping
@@ -96,7 +96,7 @@ func (c *Client) addOperationSetIdentityPoolRolesMiddlewares(stack *middleware.S
 	if err = addComputePayloadSHA256(stack); err != nil {
 		return err
 	}
-	if err = addRetry(stack, options); err != nil {
+	if err = addRetry(stack, options, c); err != nil {
 		return err
 	}
 	if err = addRawResponseToMetadata(stack); err != nil {
@@ -120,10 +120,10 @@ func (c *Client) addOperationSetIdentityPoolRolesMiddlewares(stack *middleware.S
 	if err = addSetLegacyContextSigningOptionsMiddleware(stack); err != nil {
 		return err
 	}
-	if err = addTimeOffsetBuild(stack, c); err != nil {
+	if err = addUserAgentRetryMode(stack, options); err != nil {
 		return err
 	}
-	if err = addUserAgentRetryMode(stack, options); err != nil {
+	if err = addCredentialSource(stack, options); err != nil {
 		return err
 	}
 	if err = addOpSetIdentityPoolRolesValidationMiddleware(stack); err != nil {
@@ -147,16 +147,13 @@ func (c *Client) addOperationSetIdentityPoolRolesMiddlewares(stack *middleware.S
 	if err = addDisableHTTPSMiddleware(stack, options); err != nil {
 		return err
 	}
-	if err = addSpanInitializeStart(stack); err != nil {
+	if err = addInterceptBeforeRetryLoop(stack, options); err != nil {
 		return err
 	}
-	if err = addSpanInitializeEnd(stack); err != nil {
+	if err = addInterceptAttempt(stack, options); err != nil {
 		return err
 	}
-	if err = addSpanBuildRequestStart(stack); err != nil {
-		return err
-	}
-	if err = addSpanBuildRequestEnd(stack); err != nil {
+	if err = addInterceptors(stack, options); err != nil {
 		return err
 	}
 	return nil

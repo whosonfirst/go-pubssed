@@ -25,7 +25,7 @@ import (
 // providing the existing IdentityId . This API will create the identity in the
 // specified IdentityPoolId .
 //
-// You must use AWS Developer credentials to call this API.
+// You must use Amazon Web Services developer credentials to call this operation.
 func (c *Client) GetOpenIdTokenForDeveloperIdentity(ctx context.Context, params *GetOpenIdTokenForDeveloperIdentityInput, optFns ...func(*Options)) (*GetOpenIdTokenForDeveloperIdentityOutput, error) {
 	if params == nil {
 		params = &GetOpenIdTokenForDeveloperIdentityInput{}
@@ -71,11 +71,11 @@ type GetOpenIdTokenForDeveloperIdentityInput struct {
 	// The expiration time of the token, in seconds. You can specify a custom
 	// expiration time for the token so that you can cache it. If you don't provide an
 	// expiration time, the token is valid for 15 minutes. You can exchange the token
-	// with Amazon STS for temporary AWS credentials, which are valid for a maximum of
-	// one hour. The maximum token duration you can set is 24 hours. You should take
-	// care in setting the expiration time for a token, as there are significant
-	// security implications: an attacker could use a leaked token to access your AWS
-	// resources for the token's duration.
+	// with Amazon STS for temporary Amazon Web Services credentials, which are valid
+	// for a maximum of one hour. The maximum token duration you can set is 24 hours.
+	// You should take care in setting the expiration time for a token, as there are
+	// significant security implications: an attacker could use a leaked token to
+	// access your Amazon Web Services resources for the token's duration.
 	//
 	// Please provide for a small grace period, usually no more than 5 minutes, to
 	// account for clock skew.
@@ -133,7 +133,7 @@ func (c *Client) addOperationGetOpenIdTokenForDeveloperIdentityMiddlewares(stack
 	if err = addComputePayloadSHA256(stack); err != nil {
 		return err
 	}
-	if err = addRetry(stack, options); err != nil {
+	if err = addRetry(stack, options, c); err != nil {
 		return err
 	}
 	if err = addRawResponseToMetadata(stack); err != nil {
@@ -157,10 +157,10 @@ func (c *Client) addOperationGetOpenIdTokenForDeveloperIdentityMiddlewares(stack
 	if err = addSetLegacyContextSigningOptionsMiddleware(stack); err != nil {
 		return err
 	}
-	if err = addTimeOffsetBuild(stack, c); err != nil {
+	if err = addUserAgentRetryMode(stack, options); err != nil {
 		return err
 	}
-	if err = addUserAgentRetryMode(stack, options); err != nil {
+	if err = addCredentialSource(stack, options); err != nil {
 		return err
 	}
 	if err = addOpGetOpenIdTokenForDeveloperIdentityValidationMiddleware(stack); err != nil {
@@ -184,16 +184,13 @@ func (c *Client) addOperationGetOpenIdTokenForDeveloperIdentityMiddlewares(stack
 	if err = addDisableHTTPSMiddleware(stack, options); err != nil {
 		return err
 	}
-	if err = addSpanInitializeStart(stack); err != nil {
+	if err = addInterceptBeforeRetryLoop(stack, options); err != nil {
 		return err
 	}
-	if err = addSpanInitializeEnd(stack); err != nil {
+	if err = addInterceptAttempt(stack, options); err != nil {
 		return err
 	}
-	if err = addSpanBuildRequestStart(stack); err != nil {
-		return err
-	}
-	if err = addSpanBuildRequestEnd(stack); err != nil {
+	if err = addInterceptors(stack, options); err != nil {
 		return err
 	}
 	return nil
